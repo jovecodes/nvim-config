@@ -18,8 +18,6 @@ return {
 				-- to add ANSI escape code support, add:
 				baleia_setup = true,
 			}
-
-			vim.keymap.set("n", "<leader>r", "<cmd>botright Compile ./build.jov.sh<cr>", { noremap = true, silent = true })
 		end
 	},
 }
