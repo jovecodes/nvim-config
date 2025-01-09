@@ -1,20 +1,28 @@
+local lsp_enabled = true
+vim.api.nvim_create_user_command("Lsp", function() 
+    lsp_enabled = not lsp_enabled
+
+    if lsp_enabled then
+        vim.cmd("LspStart")
+        print("Enabled")
+    else
+        vim.cmd("LspStop")
+        print("Disabled")
+    end
+end, {})
+
 return {
 	{
 		'neovim/nvim-lspconfig',
 		dependencies = { 'saghen/blink.cmp' },
 
 		-- example using `opts` for defining servers
-		opts = {
-			servers = {
-				lua_ls = {}
-			}
-		},
+		opts = { },
 		-- example calling setup directly for each LSP
 		config = function()
 			local capabilities = require('blink.cmp').get_lsp_capabilities()
 			local lspconfig = require('lspconfig')
 
-			lspconfig['lua-ls'].setup({ capabilities = capabilities })
 			lspconfig['clangd'].setup({ capabilities = capabilities })
 
 			vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
@@ -25,17 +33,17 @@ return {
 
 			vim.api.nvim_create_autocmd("LspAttach", {
 			    group = vim.api.nvim_create_augroup("UserLspKeymaps", { clear = true }),
-			    callback = function(ev)
-				local opts = { buffer = ev.buf, noremap = true, silent = true }
+                callback = function(ev)
+                    local opts = { buffer = ev.buf, noremap = true, silent = true }
 
-				vim.keymap.set('n', "<leader>cd", function() vim.lsp.buf.hover() end, opts)
-				vim.keymap.set('n', "<leader>R", function() vim.lsp.buf.rename() end, opts)
-				vim.keymap.set('n', "<leader>ce", function()
-				    vim.diagnostic.open_float({ header = "Buffer Diagnostics", scope = "buffer" })
-				end, opts)
-				vim.keymap.set('n', "<leader>cp", function() vim.diagnostic.goto_prev() end, opts)
-				vim.keymap.set('n', "<leader>cn", function() vim.diagnostic.goto_next() end, opts)
-			    end,
+                    vim.keymap.set('n', "<leader>cd", function() vim.lsp.buf.hover() end, opts)
+                    vim.keymap.set('n', "<leader>R", function() vim.lsp.buf.rename() end, opts)
+                    vim.keymap.set('n', "<leader>ce", function()
+                        vim.diagnostic.open_float({ header = "Buffer Diagnostics", scope = "buffer" })
+                    end, opts)
+                    vim.keymap.set('n', "<leader>cp", function() vim.diagnostic.goto_prev() end, opts)
+                    vim.keymap.set('n', "<leader>cn", function() vim.diagnostic.goto_next() end, opts)
+                end,
 			})
 		end
 	},
