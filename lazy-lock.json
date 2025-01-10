@@ -3,7 +3,7 @@
   "baleia.nvim": { "branch": "main", "commit": "fb3aff021b2b64ef820d0230d2c22ebfaf71bb6a" },
   "blink.cmp": { "branch": "main", "commit": "1cc3b1a908fbcfd15451c4772759549724f38524" },
   "compile-mode.nvim": { "branch": "latest", "commit": "4feef0bd6485218f50563a61140233f16561c786" },
-  "fzf-lua": { "branch": "main", "commit": "74f94823a702b032b16c79732072c43e61181b69" },
+  "fzf-lua": { "branch": "main", "commit": "af6ecbd7f421e7894127a9e94b40e13172fbfb13" },
   "git-conflict.nvim": { "branch": "main", "commit": "a1badcd070d176172940eb55d9d59029dad1c5a6" },
   "gruvbox-flat.nvim": { "branch": "master", "commit": "1dc35c81da30d297f82d438ff362cf1b01d36782" },
   "lazy.nvim": { "branch": "main", "commit": "d8f26efd456190241afd1b0f5235fe6fdba13d4a" },
