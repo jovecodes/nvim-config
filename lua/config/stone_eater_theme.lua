@@ -12,6 +12,9 @@ stone_eater.set_highlights = function(colors)
 
   vim.api.nvim_set_hl(0, "String", { fg="#8cdd92" })
 
+  vim.api.nvim_set_hl(0, "BlinkCmpKind", { link="Normal" })
+  vim.api.nvim_set_hl(0, "Identifier", { link="Normal" })
+
   local blue = "#8ec0ef"
   vim.api.nvim_set_hl(0, "Function", { fg=blue })
   vim.api.nvim_set_hl(0, "Special", { link="Function" })

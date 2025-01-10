@@ -12,7 +12,7 @@ return {
 
 			lspconfig['clangd'].setup({
 				capabilities = capabilities,
-                enabled = false,
+                autostart = false,
 			})
 
 			vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
