@@ -1,16 +1,3 @@
-local lsp_enabled = true
-vim.api.nvim_create_user_command("Lsp", function() 
-    lsp_enabled = not lsp_enabled
-
-    if lsp_enabled then
-        vim.cmd("LspStart")
-        print("Enabled")
-    else
-        vim.cmd("LspStop")
-        print("Disabled")
-    end
-end, {})
-
 return {
 	{
 		'neovim/nvim-lspconfig',
@@ -23,7 +10,10 @@ return {
 			local capabilities = require('blink.cmp').get_lsp_capabilities()
 			local lspconfig = require('lspconfig')
 
-			lspconfig['clangd'].setup({ capabilities = capabilities })
+			lspconfig['clangd'].setup({
+				capabilities = capabilities,
+                enabled = false,
+			})
 
 			vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
 				vim.lsp.diagnostic.on_publish_diagnostics, {

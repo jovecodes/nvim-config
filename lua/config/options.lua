@@ -10,6 +10,8 @@ vim.api.nvim_create_autocmd("TermOpen", {
     end,
 })
 
+vim.api.nvim_set_keymap('n', '<leader>d', '<CMD>Recompile<CR>', { noremap = true, silent = true })
+
 
 -- vim.o.termguicolors = true  -- enable rgb colors
 

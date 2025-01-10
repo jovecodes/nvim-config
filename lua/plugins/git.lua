@@ -1,4 +1,3 @@
--- Git related plugins
 return {
 	{
 		"akinsho/git-conflict.nvim",
