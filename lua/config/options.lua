@@ -11,6 +11,12 @@ vim.api.nvim_create_autocmd("TermOpen", {
 })
 
 vim.api.nvim_set_keymap('n', '<leader>d', '<CMD>Recompile<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>tp', '<CMD>NextError<CR>', { noremap = true, silent = true })
+vim.api.nvim_create_user_command('C', 'Compile <args>', {
+  nargs = '*',
+  complete = 'file',  -- Enable file path autocompletion
+})
+vim.api.nvim_create_user_command('R', 'Recompile', {})
 
 
 -- vim.o.termguicolors = true  -- enable rgb colors
