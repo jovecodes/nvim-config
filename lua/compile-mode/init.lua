@@ -211,7 +211,7 @@ vim.api.nvim_create_autocmd("TermEnter", {
 ----------------------- Mappings -----------------------
 --------------------------------------------------------
 
-vim.api.nvim_set_keymap('n', '<leader>d', '<CMD>C<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>r', '<CMD>C<CR>', { noremap = true, silent = true })
 
 vim.api.nvim_create_user_command('T', function() toggle_term() end, {})
 vim.api.nvim_set_keymap('n', '<C-t>', '<Cmd>T<CR>', { noremap = true, silent = true })
