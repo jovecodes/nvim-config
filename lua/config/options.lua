@@ -23,6 +23,8 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
+vim.o.scrolloff = 8
+
 -- local timer = vim.uv.new_timer()
 -- timer:start(0, 1000, vim.schedule_wrap(function()
 --     local bufnr = vim.api.nvim_get_current_buf()

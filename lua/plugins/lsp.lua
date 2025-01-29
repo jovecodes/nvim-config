@@ -35,6 +35,8 @@ return {
                     end, opts)
                     vim.keymap.set('n', "<leader>cp", function() vim.diagnostic.goto_prev() end, opts)
                     vim.keymap.set('n', "<leader>cn", function() vim.diagnostic.goto_next() end, opts)
+
+                    vim.keymap.set('n', "<leader>h", function() vim.lsp.buf.code_action() end, { noremap = true, silent = true })
                 end,
 			})
 		end

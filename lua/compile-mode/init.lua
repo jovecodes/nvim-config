@@ -3,55 +3,52 @@
 --------------------------------------------------------
 
 --
--- Why the fuck are peoples' plugins so bloated.
--- This is all the functionality of toggleterm I used in ~40 loc.
+-- Why the fuck are people's plugins so bloated.
+-- This is all the functionality of toggleterm I used a single small snippet of code.
 --
 
-local window_handle = nil
-local buffer_handle = nil
-local last_buffer = nil
+local shell = "$SHELL"
+local on_create_shell = ""
 
-local is_open = false
+local window_handle = -1
+local buffer_handle = -1
 
 local function write_line(ln) 
-    vim.cmd(":startinsert")
-    if ln then vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(ln .. "<CR>", true, false, true), "n", false) end
+    if (ln) then 
+        local chan = vim.b.terminal_job_id 
+        vim.api.nvim_chan_send(chan, ln .. "\n")
+    end
 end
 
 local function toggle_term(cmd)
-    is_open = not is_open
+    local is_open = not vim.api.nvim_win_is_valid(window_handle)
 
     if not is_open then
-        vim.cmd(":b " .. buffer_handle)
+        vim.api.nvim_set_current_win(window_handle)
         vim.cmd(":close")
-
-        vim.cmd(":b " .. last_buffer)
     elseif buffer_handle ~= nil and vim.api.nvim_buf_is_valid(buffer_handle) then
         vim.api.nvim_command('botright split')
         vim.cmd(":b " .. buffer_handle)
         write_line(cmd)
         window_handle = vim.api.nvim_tabpage_get_win(0)
     else
-        last_buffer = vim.api.nvim_win_get_buf(0)
-
         vim.api.nvim_command('botright split new')
         buffer_handle = vim.api.nvim_win_get_buf(0)
 
         vim.api.nvim_buf_set_name(buffer_handle, "Terminal")
-        vim.api.nvim_call_function("termopen", {"$SHELL"})
+        vim.api.nvim_call_function("termopen", {shell})
+        if on_create_shell ~= '' then 
+            write_line(on_enter_shell) 
+        end
+
         write_line(cmd)
         window_handle = vim.api.nvim_tabpage_get_win(0)
     end
-end
 
-vim.api.nvim_create_autocmd("WinClosed", {
-  callback = function(args)
-        local current_buffer = vim.api.nvim_get_current_buf()
-        if current_buffer == buffer_handle then
-            is_open = false
-        end
-  end
-})
+    if is_open then 
+        vim.cmd(":startinsert") 
+    end
+end
 
 --------------------------------------------------------
 --------------------- Compile Mode ---------------------
@@ -72,14 +69,11 @@ local function compile(param)
         stored_cmd = cmd
     end
 
-    if is_open then
-        write_line("clear")
-    else
-        toggle_term("clear")
+    if buffer_handle ~= -1 then
+        vim.api.nvim_buf_delete(buffer_handle, { force = true })
     end
 
-    write_line(cmd)
-    -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, false, true), 'x', true)
+    toggle_term(cmd)
 end
 
 vim.api.nvim_create_user_command('C', compile, {
@@ -93,13 +87,19 @@ vim.api.nvim_create_user_command('C', compile, {
 
 local error_regex_table = {
     basic = {
-        regex = "^./([^:]+):(%d+):(%d+): ([a-z]+): (.+)",
+        regex = "^([^:]+):(%d+):(%d+): (.+): (.+)",
         filename = 1,
         row = 2,
         col = 3,
         type = 4,
         message = 5,
-    }
+    },
+    basic_no_col = {
+        regex = "^([^:]+):(%d+)(.+)",
+        filename = 1,
+        row = 2,
+        message = 3,
+    },
 }
 
 local function match_list_position(input, pattern, matcher)
@@ -133,31 +133,54 @@ end
 local error_table = {} -- Holds all the error's locations so when we press enter we can go there.
 local current_error_index = 0 -- Keeps track of the current error in the table
 
+-- Create a namespace for highlights
+local error_ns_id = vim.api.nvim_create_namespace("error_highlight")
+vim.api.nvim_set_hl(0, "ErrorFile", { fg = "#c23535", bold = true })
+vim.api.nvim_set_hl(0, "ErrorLine", { fg = "#b3b521", bold = true })
+vim.api.nvim_set_hl(0, "ErrorColumn", { fg = "#6a9fb5", bold = true })
+
 local function parse(buffer)
     error_table = {}
 
+    -- Clear any previous highlights to avoid overlap
+    vim.api.nvim_buf_clear_namespace(buffer, error_ns_id, 0, -1)
+
     local text = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
-    for _, line in ipairs(text) do
+    for term_line_number, line in ipairs(text) do
         for _, matcher in pairs(error_regex_table) do
             local result = match_list_position(line, matcher.regex, matcher)
             if result ~= nil then
                 local values = result.values
 
-                -- Extract values using matcher indices
                 table.insert(error_table, {
                     filename = values[matcher.filename],
-                    row = tonumber(values[matcher.row]),
-                    col = tonumber(values[matcher.col]),
+                    row = tonumber(values[matcher.row]) or 1,
+                    col = tonumber(values[matcher.col]) or 1,
                     type = values[matcher.type],
                     message = values[matcher.message],
                     line = line, -- Full line for context
                 })
+
+                local end_hl = #values[matcher.filename]
+                vim.api.nvim_buf_add_highlight(buffer, error_ns_id, "ErrorFile", term_line_number - 1, 0, end_hl)
+                end_hl = end_hl + 1
+                
+                local start_hl = end_hl
+                end_hl = end_hl + #values[matcher.row]
+                vim.api.nvim_buf_add_highlight(buffer, error_ns_id, "ErrorLine", term_line_number - 1, start_hl, end_hl)
+                end_hl = end_hl + 1
+                
+                if values[matcher.col] then 
+                    local start_hl = end_hl
+                    end_hl = end_hl + #values[matcher.col]
+                    vim.api.nvim_buf_add_highlight(buffer, error_ns_id, "ErrorColumn", term_line_number - 1, start_hl, end_hl)
+                end
             end
         end
     end
 end
 
-vim.api.nvim_create_autocmd('TextChanged', {
+vim.api.nvim_create_autocmd({ "BufReadPost", "TextChanged" }, {
   callback = function(args)
     local current_buffer = vim.api.nvim_get_current_buf()
     if current_buffer == buffer_handle then 
