@@ -26,30 +26,30 @@ local function toggle_term(cmd)
     if not is_open then
         vim.api.nvim_set_current_win(window_handle)
         vim.cmd(":close")
-    elseif buffer_handle ~= nil and vim.api.nvim_buf_is_valid(buffer_handle) then
-        vim.api.nvim_command('botright split')
-        vim.cmd(":b " .. buffer_handle)
-        write_line(cmd)
-        window_handle = vim.api.nvim_tabpage_get_win(0)
     else
-        vim.api.nvim_command('botright split new')
-        buffer_handle = vim.api.nvim_win_get_buf(0)
+        local win_opts = {
+            vertical = true,
+            split = "below",
+            focusable = false,
+        }
 
-        vim.api.nvim_buf_set_name(buffer_handle, "Terminal")
-        vim.api.nvim_call_function("termopen", {shell})
-        if on_create_shell ~= '' then 
-            write_line(on_enter_shell) 
+        local make_term = false
+        if buffer_handle == nil or not vim.api.nvim_buf_is_valid(buffer_handle) then
+            buffer_handle = vim.api.nvim_create_buf(false, true)
+            make_term = true
+        end
+
+        window_handle = vim.api.nvim_open_win(buffer_handle, true, win_opts)
+
+        if make_term then
+            vim.api.nvim_call_function("termopen", {shell})
+            if on_create_shell ~= '' then 
+                write_line(on_enter_shell) 
+            end
         end
 
         write_line(cmd)
-        window_handle = vim.api.nvim_tabpage_get_win(0)
-    end
-
-    if is_open then 
         vim.cmd(":startinsert") 
-
-        -- Keep the terminal window from interfering with Ctrl-6 window switching
-        vim.api.nvim_win_set_config(window_handle, {focusable = false})
     end
 end
 
