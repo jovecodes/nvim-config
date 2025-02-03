@@ -47,6 +47,9 @@ local function toggle_term(cmd)
 
     if is_open then 
         vim.cmd(":startinsert") 
+
+        -- Keep the terminal window from interfering with Ctrl-6 window switching
+        vim.api.nvim_win_set_config(window_handle, {focusable = false})
     end
 end
 
