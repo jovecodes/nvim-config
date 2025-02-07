@@ -10,13 +10,25 @@
 local shell = "$SHELL"
 local on_create_shell = ""
 
+local is_windows = vim.loop.os_uname().sysname == "Windows_NT"
+if is_windows then
+    shell = "cmd.exe /k \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat\" -startdir=none -arch=x64 -host_arch=x64"
+end
+
 local window_handle = -1
 local buffer_handle = -1
 
 local function write_line(ln) 
     if (ln) then 
-        local chan = vim.b.terminal_job_id 
-        vim.api.nvim_chan_send(chan, ln .. "\n")
+        local function feedkeys(keys)
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(keys, true, false, true), "n", false)
+        end
+
+        local chan = vim.b.terminal_job_id
+        vim.api.nvim_chan_send(chan, ln)  -- Send the text
+
+        vim.cmd(":startinsert") 
+        feedkeys("<Cr><Esc>")  -- Press Enter and exit insert mode
     end
 end
 
@@ -62,6 +74,9 @@ local function isempty(s)
 end
 
 local stored_cmd = "./build.jov.sh"
+if is_windows then
+    stored_cmd = "build.bat"
+end
 
 local function compile(param) 
     local cmd = param.args
@@ -72,7 +87,7 @@ local function compile(param)
         stored_cmd = cmd
     end
 
-    if buffer_handle ~= -1 then
+    if buffer_handle ~= -1 and not is_windows then
         vim.api.nvim_buf_delete(buffer_handle, { force = true })
     end
 
