@@ -1,4 +1,57 @@
--- Bootstrap lazy.nvim
+vim.opt.clipboard = "unnamedplus"
+
+vim.api.nvim_set_keymap('n', "<leader>/",  "<CMD>let @/=''<CR>", { noremap = true, silent = true })
+
+vim.o.termguicolors = true  -- enable rgb colors
+
+vim.o.cursorline = true     -- enable cursor line
+
+vim.o.number = true         -- enable line number
+vim.o.relativenumber = true -- and relative line number
+
+vim.o.tabstop = 4
+vim.o.softtabstop = 4
+vim.o.expandtab = true
+vim.o.shiftwidth = 4
+vim.o.spelllang = "en"
+vim.o.spellsuggest = "best,8"
+
+vim.o.history = 100
+vim.o.undolevels = 1000
+vim.o.undofile = true
+
+vim.o.ignorecase = true
+vim.o.smartcase = true
+
+vim.o.scrolloff = 8
+
+local theme = {}
+
+theme.set_highlights = function(colors)
+  vim.api.nvim_set_hl(0, "Type", { fg="NvimLightYellow" })
+  vim.api.nvim_set_hl(0, "StatusLine", { fg="NvimLightGrey3", bg="NvimDarkGrey3" })
+  vim.api.nvim_set_hl(0, "BlinkCmpMenuSelection", { bg="NvimDarkGrey3", bold=true })
+
+  vim.api.nvim_set_hl(0, "Macro", { bold=true })
+  vim.api.nvim_set_hl(0, "Include", { link="Macro" })
+
+  vim.api.nvim_set_hl(0, "Constant", { fg="#99e6d5" })
+  vim.api.nvim_set_hl(0, "Number", { link="Constant" })
+
+  vim.api.nvim_set_hl(0, "String", { fg="#90a959" })
+
+  vim.api.nvim_set_hl(0, "Identifier", { fg="NvimLightGrey2" })
+  vim.api.nvim_set_hl(0, "BlinkCmpKind", { link="Identifier" })
+
+  vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg="#90a959" })
+
+  local blue = "#8ec0ef"
+  vim.api.nvim_set_hl(0, "Function", { fg=blue })
+  vim.api.nvim_set_hl(0, "Special", { link="Function" })
+end
+
+theme.set_highlights(theme.colors)
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
     local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -15,9 +68,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Make sure to setup `mapleader` and `maplocalleader` before
--- loading lazy.nvim so that mappings are correct.
--- This is also a good place to setup other settings (vim.opt)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
@@ -38,16 +88,6 @@ require("lazy").setup({
         notify = true, -- get a notification when new updates are found
         frequency = 3600, -- check for updates every hour
         check_pinned = false, -- check for pinned packages that can't be updated
-    },
-
-    dev = {
-        -- Directory where you store your local plugin projects. If a function is used,
-        -- the plugin directory (e.g. `~/projects/plugin-name`) must be returned.
-        ---@type string | fun(plugin: LazyPlugin): string
-        path = "~/Code",
-        ---@type string[] plugins that match these patterns will use your local versions instead of being fetched from GitHub
-        patterns = {}, -- For example {"folke"}
-        fallback = false, -- Fallback to git when local plugin doesn't exist
     },
 
     performance = {
