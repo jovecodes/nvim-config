@@ -1,14 +1,10 @@
 vim.opt.clipboard = "unnamedplus"
 
-vim.api.nvim_set_keymap('n', "<leader>/",  "<CMD>let @/=''<CR>", { noremap = true, silent = true })
+vim.o.termguicolors = true
+vim.o.cursorline = true
 
-vim.o.termguicolors = true  -- enable rgb colors
-
-vim.o.cursorline = true     -- enable cursor line
-
-vim.o.number = true         -- enable line number
-vim.o.relativenumber = true -- and relative line number
-
+vim.o.number = true
+vim.o.relativenumber = true
 vim.o.tabstop = 4
 vim.o.softtabstop = 4
 vim.o.expandtab = true
@@ -25,93 +21,84 @@ vim.o.smartcase = true
 
 vim.o.scrolloff = 8
 
-local theme = {}
-
-theme.set_highlights = function(colors)
-  vim.api.nvim_set_hl(0, "Type", { fg="NvimLightYellow" })
-  vim.api.nvim_set_hl(0, "StatusLine", { fg="NvimLightGrey3", bg="NvimDarkGrey3" })
-  vim.api.nvim_set_hl(0, "BlinkCmpMenuSelection", { bg="NvimDarkGrey3", bold=true })
-
-  vim.api.nvim_set_hl(0, "Macro", { bold=true })
-  vim.api.nvim_set_hl(0, "Include", { link="Macro" })
-
-  vim.api.nvim_set_hl(0, "Constant", { fg="#99e6d5" })
-  vim.api.nvim_set_hl(0, "Number", { link="Constant" })
-
-  vim.api.nvim_set_hl(0, "String", { fg="#90a959" })
-
-  vim.api.nvim_set_hl(0, "Identifier", { fg="NvimLightGrey2" })
-  vim.api.nvim_set_hl(0, "BlinkCmpKind", { link="Identifier" })
-
-  vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg="#90a959" })
-
-  local blue = "#8ec0ef"
-  vim.api.nvim_set_hl(0, "Function", { fg=blue })
-  vim.api.nvim_set_hl(0, "Special", { link="Function" })
-end
-
-theme.set_highlights(theme.colors)
-
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-    local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-    local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-    if vim.v.shell_error ~= 0 then
-        vim.api.nvim_echo({
-            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-            { out, "WarningMsg" },
-            { "\nPress any key to exit..." },
-        }, true, {})
-        vim.fn.getchar()
-        os.exit(1)
-    end
-end
-vim.opt.rtp:prepend(lazypath)
-
-vim.g.mapleader = " "
+vim.g.mapleader      = " "
 vim.g.maplocalleader = "\\"
 
--- Setup lazy.nvim
-require("lazy").setup({
-    spec = {
-        -- import your plugins
-        { import = "plugins" },
-    },
-    -- Configure any other settings here. See the documentation for more details.
-    -- colorscheme that will be used when installing plugins.
-    -- install = { colorscheme = { "gruvbox-flat" } },
-    -- automatically check for plugin updates
-    checker = {
-        -- automatically check for plugin updates
-        enabled = false,
-        concurrency = nil, ---@type number? set to 1 to check for updates very slowly
-        notify = true, -- get a notification when new updates are found
-        frequency = 3600, -- check for updates every hour
-        check_pinned = false, -- check for pinned packages that can't be updated
-    },
+vim.o.makeprg = "./build.jov.sh"
+vim.keymap.set("n", "<leader>r", ":make<CR>",  { desc = "Run :make" })
+vim.keymap.set("n", "<leader>n", ":cnext<CR>", { desc = "Next quickfix item" })
 
-    performance = {
-        cache = {
-            enabled = true,
-        },
-        reset_packpath = true, -- reset the package path to improve startup time
-        rtp = {
-            reset = true, -- reset the runtime path to $VIMRUNTIME and your config directory
-            ---@type string[]
-            paths = {}, -- add any custom paths here that you want to includes in the rtp
-            ---@type string[] list any plugins you want to disable here
-            disabled_plugins = {
-                "gzip",
-                "matchit",
-                "matchparen",
-                "netrwPlugin",
-                "tarPlugin",
-                "tohtml",
-                "tutor",
-                "zipPlugin",
-            },
-        },
+vim.keymap.set("n", "<leader>/", "<cmd>let @/=''<cr>", { silent = true })
+vim.cmd("nnoremap <leader>cd :cd %:p:h<CR>:pwd<CR>")
+
+vim.filetype.add({
+  extension = {
+    vs = "glsl",
+    fs = "glsl",
+    gs = "glsl",
+  },
+})
+
+vim.api.nvim_create_user_command("ExtractCFunc", function()
+    require("extract_c").extract()
+end, {})
+
+vim.pack.add({
+    "https://github.com/stevearc/oil.nvim",
+    "https://github.com/tpope/vim-fugitive",
+    "https://github.com/tpope/vim-abolish",
+    "https://github.com/junegunn/vim-easy-align",
+    "https://github.com/ibhagwan/fzf-lua",
+    "https://github.com/blazkowolf/gruber-darker.nvim",
+    "https://github.com/numToStr/Comment.nvim",
+    "https://github.com/beyondmarc/hlsl.vim",
+    -- {
+    --     'chomosuke/typst-preview.nvim',
+    --     ft = 'typst',
+    -- },
+})
+
+vim.cmd("packadd nvim.undotree")
+
+require("oil").setup()
+vim.keymap.set("n", "<leader>e", "<cmd>Oil<cr>", { desc = "View filesystem" })
+
+require('fzf-lua').setup({
+    previewers = {
+        find = {
+            rg_opts = [[--color=never --hidden --files -g "!.git" --no-binary]]
+        }
+    }
+})
+
+-- Keymaps for fzf-lua
+vim.keymap.set("n", "<leader>af", "<cmd>FzfLua git_files<cr>", { desc = "Find files" })
+vim.keymap.set("n", "<leader>f", "<cmd>FzfLua files<cr>", { desc = "Find files" })
+vim.keymap.set("n", "<leader>g", "<cmd>FzfLua live_grep<cr>", { desc = "Grep string" })
+
+require("Comment").setup({
+    padding = true, -- Add a space b/w comment and the line
+    sticky = true, -- Whether the cursor should stay at its position
+    ignore = nil, -- Lines to be ignored while (un)comment
+    toggler = { -- LHS of toggle mappings in NORMAL mode
+        line = '<leader>cc', -- Line-comment toggle keymap
+        block = '<leader>bc', -- Block-comment toggle keymap
+    },
+    opleader = { -- LHS of operator-pending mappings in NORMAL and VISUAL mode
+        line = '<leader>c', -- Line-comment keymap
+    },
+    mappings = {
+        basic = true, -- Operator-pending mapping; `gcc` `gbc` `gc[count]{motion}` `gb[count]{motion}`
     },
 })
 
-require("compile_mode")
+require("gruber-darker").setup({
+    italic = {
+      strings = false,
+      comments = false,
+    },
+  }
+)
+
+vim.cmd("colorscheme gruber-darker")
+-- vim.opt.autochdir = true

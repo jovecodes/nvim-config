@@ -1,0 +1,3 @@
+[submodule "pack/vim-lldb"]
+	path = pack/vim-lldb
+	url = https://github.com/gilligan/vim-lldb.git
